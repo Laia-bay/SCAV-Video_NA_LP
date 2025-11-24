@@ -1,0 +1,6 @@
+streamlit
+Pillow
+PyWavelets
+numpy
+scipy
+ffmpeg-python
