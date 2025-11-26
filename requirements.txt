@@ -1,6 +1,9 @@
-streamlit
+fastapi
+uvicorn
 Pillow
 PyWavelets
 numpy
 scipy
 ffmpeg-python
+python-multipart
+requests
