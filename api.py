@@ -24,7 +24,7 @@ async def serpentine_endpoint(file: UploadFile = File(...)):
     serpentine_pattern.serpentine(input_path, output_path)
 
     with open(output_path, "rb") as f:
-        return Response(content=f.read(), media_type="image/jpeg")
+        return Response(content=f.read(), media_type="image/jpg")
 
 
 @app.post("/B&W")
@@ -40,4 +40,4 @@ async def bw_endpoint(file: UploadFile = File(...)):
     black_white.grayscale_image(input_path, output_path)
 
     with open(output_path, "rb") as f:
-        return Response(content=f.read(), media_type="image/jpeg")
+        return Response(content=f.read(), media_type="image/jpg")

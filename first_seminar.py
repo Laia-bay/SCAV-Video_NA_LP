@@ -70,7 +70,8 @@ class serpentine_pattern:
                 for (x,y) in serpentine_order:           ## for each pixel (each pair of x,y coordinates)
                     pixel_x = w + x                        ## the coordinate of the serpentine plus the block that it is in
                     pixel_y = h + y
-                    pixels_read.append(pixels_im[pixel_x, pixel_y])
+                    if pixel_x < width and pixel_y < height:
+                        pixels_read.append(pixels_im[pixel_x, pixel_y])
 
           ## Saving list of pixels into an image
         #create array with list, and reshape into width and height of image
