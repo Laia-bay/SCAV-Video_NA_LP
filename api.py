@@ -9,7 +9,7 @@ import ffmpeg
 app = FastAPI()
 
 IMAGE_FOLDER = "images"
-RESULT_FOLDER = "result_images"
+RESULT_FOLDER = "image_results"
 
 os.makedirs(RESULT_FOLDER, exist_ok=True)   ## to make sure that the folder where the modified images will be saved exists.
 
@@ -19,7 +19,7 @@ async def serpentine_endpoint(file: UploadFile = File(...)):
     img_bytes = await file.read()
 
     input_path = "temp_input.jpg"
-    output_path = "result_images/output_serpentine.jpg"
+    output_path = "image_results/output_serpentine.jpg"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
@@ -35,7 +35,7 @@ async def bw_endpoint(file: UploadFile = File(...)):
     img_bytes = await file.read()
 
     input_path = "temp_input.jpg"
-    output_path = "result_images/output_bw.jpg"
+    output_path = "image_results/output_bw.jpg"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
