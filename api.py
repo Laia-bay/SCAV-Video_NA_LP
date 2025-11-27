@@ -60,3 +60,21 @@ async def resize_video_endpoint(file: UploadFile = File(...)):
 
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
+
+# Endpoint to modify the chroma subsampling 
+@app.post("/chroma_subsampling")
+async def chroma_subsampling(file: UploadFile = File(...)):
+
+    img_bytes = await file.read()
+
+    input_path = "temp_chroma_subsampling_input.jpg"
+    output_path = "image_results/test_chroma_subsampling.jpg"
+
+    with open(input_path, "wb") as f:
+        f.write(img_bytes)
+
+    # Apply chroma subsampling using pix_fmt
+    ffmpeg.input(input_path).output(output_path, pix_fmt="yuvj420p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    with open(output_path, "rb") as f:
+        return Response(content=f.read(), media_type="image/jpg") 
