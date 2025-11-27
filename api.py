@@ -102,16 +102,17 @@ async def video_info(file: UploadFile = File(...)):
     trimmed_video_path = "temp_bbb_trimmed.mp4"
     aac_audio_path = "aac_mono_audio.aac"
     mp3_audio_path = "mp3_stereo_audio.mp3"
-    ac3_audio_path = "image_results/ac3_audio.ac3"
+    ac3_audio_path = "ac3_audio.ac3"
+    #output_path = "image_results/test_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
 
     # cut first 20 seconds of the video
-    ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="libx264",acodec="copy").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+    ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="libx264").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
     # create AAC mono audio
-    ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1,vn=None).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+    ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
     # create MP3 stereo audio with lower bitrate
     ffmpeg.input(trimmed_video_path).output(mp3_audio_path,acodec="mp3",ac=2,audio_bitrate="128k").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
@@ -119,5 +120,5 @@ async def video_info(file: UploadFile = File(...)):
     # create AC3 mono audio
     ffmpeg.input(trimmed_video_path).output(ac3_audio_path,acodec="ac3",ac=2).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
 
-    with open(ac3_audio_path, "rb") as f:
-        return Response(content=f.read(), media_type="audio/ac3")
+    with open(trimmed_video_path, "rb") as f:
+        return Response(content=f.read(), media_type="video/mp4")
