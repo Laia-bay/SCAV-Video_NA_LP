@@ -100,7 +100,8 @@ async def video_info(file: UploadFile = File(...)):
 
     input_path = "temp_bbb_input.mp4"
     trimmed_video_path = "temp_bbb_trimmed.mp4"
-    aac_audio_path = "image_results/aac_mono_audio.aac"
+    aac_audio_path = "aac_mono_audio.aac"
+    mp3_audio_path = "image_results/mp3_stereo_audio.mp3"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -111,5 +112,8 @@ async def video_info(file: UploadFile = File(...)):
     # create AAC mono audio
     ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1,vn=None).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
-    with open(aac_audio_path, "rb") as f:
-        return Response(content=f.read(), media_type="audio/aac")
+    # create MP3 stereo audio with lower bitrate
+    ffmpeg.input(trimmed_video_path).output(mp3_audio_path,acodec="mp3",ac=2,audio_bitrate="128k").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+    
+    with open(mp3_audio_path, "rb") as f:
+        return Response(content=f.read(), media_type="audio/mp3")
