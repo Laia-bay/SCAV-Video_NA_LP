@@ -103,7 +103,7 @@ async def video_info(file: UploadFile = File(...)):
     aac_audio_path = "aac_mono_audio.aac"
     mp3_audio_path = "mp3_stereo_audio.mp3"
     ac3_audio_path = "ac3_audio.ac3"
-    #output_path = "image_results/test_BBB_container.mp4"
+    output_path = "test_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -120,5 +120,18 @@ async def video_info(file: UploadFile = File(...)):
     # create AC3 mono audio
     ffmpeg.input(trimmed_video_path).output(ac3_audio_path,acodec="ac3",ac=2).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
 
-    with open(trimmed_video_path, "rb") as f:
+    # package everything into a single MP4 container
+    video_input = ffmpeg.input(trimmed_video_path)
+    aac_input = ffmpeg.input(aac_audio_path)
+    mp3_input = ffmpeg.input(mp3_audio_path)
+    ac3_input = ffmpeg.input(ac3_audio_path)
+
+    ffmpeg.output(
+        video_input, aac_input, mp3_input, ac3_input,
+        output_path,
+        vcodec="copy",
+        acodec="copy",
+    ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
