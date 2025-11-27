@@ -67,7 +67,7 @@ async def chroma_subsampling(file: UploadFile = File(...)):
 
     img_bytes = await file.read()
 
-    input_path = "temp_chroma_subsampling_input.jpg"
+    input_path = "images/temp_chroma_subsampling_input.jpg"
     output_path = "image_results/test_chroma_subsampling.jpg"
 
     with open(input_path, "wb") as f:
@@ -84,7 +84,7 @@ async def chroma_subsampling(file: UploadFile = File(...)):
 async def video_info(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "temp_video_info_input.mp4"
+    input_path = "images/temp_video_info_input.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
