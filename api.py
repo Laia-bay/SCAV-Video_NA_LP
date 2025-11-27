@@ -100,11 +100,16 @@ async def video_info(file: UploadFile = File(...)):
 
     input_path = "temp_bbb_input.mp4"
     trimmed_video_path = "temp_bbb_trimmed.mp4"
+    aac_audio_path = "image_results/aac_mono_audio.aac"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
 
-    ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="copy",acodec="copy").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+    # cut first 20 seconds of the video
+    ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="libx264",acodec="copy").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
-    with open(trimmed_video_path, "rb") as f:
-        return Response(content=f.read(), media_type="video/mp4")
+    # create AAC mono audio
+    ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1,vn=None).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+
+    with open(aac_audio_path, "rb") as f:
+        return Response(content=f.read(), media_type="audio/aac")
