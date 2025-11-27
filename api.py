@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from PIL import Image
 import numpy as np
 import os
@@ -77,4 +77,19 @@ async def chroma_subsampling(file: UploadFile = File(...)):
     ffmpeg.input(input_path).output(output_path, pix_fmt="yuvj420p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
 
     with open(output_path, "rb") as f:
-        return Response(content=f.read(), media_type="image/jpg") 
+        return Response(content=f.read(), media_type="image/jpg")
+
+# Endpoint to read the video info and print at least 5 relevant data from the video 
+@app.post("/video_info")
+async def video_info(file: UploadFile = File(...)):
+    video_bytes = await file.read()
+
+    input_path = "temp_video_info_input.mp4"
+
+    with open(input_path, "wb") as f:
+        f.write(video_bytes)
+
+    # ffprobe command to extract all possible metadata from the media file 
+    metadata = ffmpeg.probe(input_path)["streams"]
+
+    return JSONResponse(content=metadata)
