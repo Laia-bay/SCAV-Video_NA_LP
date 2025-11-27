@@ -93,3 +93,18 @@ async def video_info(file: UploadFile = File(...)):
     metadata = ffmpeg.probe(input_path)["streams"]
 
     return JSONResponse(content=metadata)
+
+@app.post("/create_BBB_container")
+async def video_info(file: UploadFile = File(...)):
+    video_bytes = await file.read()
+
+    input_path = "temp_bbb_input.mp4"
+    trimmed_video_path = "temp_bbb_trimmed.mp4"
+
+    with open(input_path, "wb") as f:
+        f.write(video_bytes)
+
+    ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="copy",acodec="copy").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+
+    with open(trimmed_video_path, "rb") as f:
+        return Response(content=f.read(), media_type="video/mp4")
