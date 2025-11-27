@@ -103,7 +103,7 @@ async def video_info(file: UploadFile = File(...)):
     aac_audio_path = "aac_mono_audio.aac"
     mp3_audio_path = "mp3_stereo_audio.mp3"
     ac3_audio_path = "ac3_audio.ac3"
-    output_path = "test_BBB_container.mp4"
+    output_path = "image_results/test_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -115,6 +115,7 @@ async def video_info(file: UploadFile = File(...)):
     ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
     # create MP3 stereo audio with lower bitrate
+    # initial bitrate = 208216 bps (we obtained this value using the previous endpoint that showed the data of the video)
     ffmpeg.input(trimmed_video_path).output(mp3_audio_path,acodec="mp3",ac=2,audio_bitrate="128k").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
     
     # create AC3 mono audio
@@ -135,3 +136,20 @@ async def video_info(file: UploadFile = File(...)):
 
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
+    
+# Endpoint to inspect mp4 tracks 
+@app.post("/inspect_mp4_tracks")
+async def video_info(file: UploadFile = File(...)):
+    video_bytes = await file.read()
+
+    input_path = "temp_container_mp4"
+
+    with open(input_path, "wb") as f:
+        f.write(video_bytes)
+
+    probe = ffmpeg.probe(input_path)
+
+    video_tracks = [s for s in probe["streams"] if s["codec_type"] == "video"]
+    audio_tracks = [s for s in probe["streams"] if s["codec_type"] == "audio"]
+
+    return {"total_tracks": len(probe["streams"]),"video_tracks": len(video_tracks),"audio_tracks": len(audio_tracks)}
