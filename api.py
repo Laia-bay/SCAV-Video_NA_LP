@@ -18,7 +18,7 @@ os.makedirs(RESULT_FOLDER, exist_ok=True)   ## to make sure that the folder wher
 async def serpentine_endpoint(file: UploadFile = File(...)):
     img_bytes = await file.read()
 
-    input_path = "temp_input.jpg"
+    input_path = "images/temp_input.jpg"
     output_path = "image_results/output_serpentine.jpg"
 
     with open(input_path, "wb") as f:
@@ -34,7 +34,7 @@ async def serpentine_endpoint(file: UploadFile = File(...)):
 async def bw_endpoint(file: UploadFile = File(...)):
     img_bytes = await file.read()
 
-    input_path = "temp_input.jpg"
+    input_path = "images/temp_input.jpg"
     output_path = "image_results/output_bw.jpg"
 
     with open(input_path, "wb") as f:
@@ -50,7 +50,7 @@ async def bw_endpoint(file: UploadFile = File(...)):
 async def resize_video_endpoint(file: UploadFile = File(...)):
     img_bytes = await file.read()
 
-    input_path = "temp_input.mp4"
+    input_path = "images/temp_input.mp4"
     output_path = "image_results/resized_video.mp4"
 
     with open(input_path, "wb") as f:
