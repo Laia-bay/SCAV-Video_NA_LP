@@ -153,3 +153,19 @@ async def video_info(file: UploadFile = File(...)):
     audio_tracks = [s for s in probe["streams"] if s["codec_type"] == "audio"]
 
     return {"total_tracks": len(probe["streams"]),"video_tracks": len(video_tracks),"audio_tracks": len(audio_tracks)}
+
+# Endpoint to show the macroblocks and the motion vectors 
+@app.post("/macroblocks_motion_vectors")
+async def video_info(file: UploadFile = File(...)):
+    video_bytes = await file.read()
+
+    input_path = "temp_input_mp4"
+    output_path = "test_macroblocks_motion_vectors.mp4"
+
+    with open(input_path, "wb") as f:
+        f.write(video_bytes)
+
+    ffmpeg.input(input_path,flags2="+export_mvs").output(output_path,vf="codecview=mv=pf+bf+bb").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    with open(output_path, "rb") as f:
+        return Response(content=f.read(), media_type="video/mp4") 
