@@ -169,3 +169,19 @@ async def video_info(file: UploadFile = File(...)):
 
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4") 
+    
+# Endpoint to show the YUV histogram
+@app.post("/yuv_histrogram")
+async def video_info(file: UploadFile = File(...)):
+    video_bytes = await file.read()
+
+    input_path = "temp_input_mp4"
+    output_path = "test_yuv_histogram.mp4"
+
+    with open(input_path, "wb") as f:
+        f.write(video_bytes)
+
+    ffmpeg.input(input_path).output(output_path,vf="histogram").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    with open(output_path, "rb") as f:
+        return Response(content=f.read(), media_type="video/mp4") 
