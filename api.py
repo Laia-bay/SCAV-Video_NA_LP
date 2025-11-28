@@ -98,7 +98,7 @@ async def video_info(file: UploadFile = File(...)):
 async def video_info(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "temp_bbb_input.mp4"
+    input_path = "images/temp_bbb_input.mp4"
     trimmed_video_path = "temp_bbb_trimmed.mp4"
     aac_audio_path = "aac_mono_audio.aac"
     mp3_audio_path = "mp3_stereo_audio.mp3"
@@ -142,7 +142,7 @@ async def video_info(file: UploadFile = File(...)):
 async def video_info(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "temp_container_mp4"
+    input_path = "images/temp_container_mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -159,8 +159,8 @@ async def video_info(file: UploadFile = File(...)):
 async def video_info(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "temp_input_mp4"
-    output_path = "test_macroblocks_motion_vectors.mp4"
+    input_path = "images/temp_input_mp4"
+    output_path = "image_results/test_macroblocks_motion_vectors.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
