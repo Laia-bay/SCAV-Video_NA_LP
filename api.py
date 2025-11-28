@@ -175,8 +175,8 @@ async def video_info(file: UploadFile = File(...)):
 async def video_info(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "temp_input_mp4"
-    output_path = "test_yuv_histogram.mp4"
+    input_path = "images/temp_input_mp4"
+    output_path = "image_results/test_yuv_histogram.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
