@@ -63,7 +63,7 @@ async def resize_video_endpoint(file: UploadFile = File(...)):
 
 # Endpoint to modify the chroma subsampling 
 @app.post("/chroma_subsampling")
-async def chroma_subsampling(file: UploadFile = File(...)):
+async def chroma_subsampling_endpoint(file: UploadFile = File(...)):
 
     img_bytes = await file.read()
 
@@ -81,7 +81,7 @@ async def chroma_subsampling(file: UploadFile = File(...)):
 
 # Endpoint to read the video info and print at least 5 relevant data from the video 
 @app.post("/video_info")
-async def video_info(file: UploadFile = File(...)):
+async def video_info_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_video_info_input.mp4"
@@ -95,7 +95,7 @@ async def video_info(file: UploadFile = File(...)):
     return JSONResponse(content=metadata)
 
 @app.post("/create_BBB_container")
-async def video_info(file: UploadFile = File(...)):
+async def create_BBB_container_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_bbb_input.mp4"
@@ -139,7 +139,7 @@ async def video_info(file: UploadFile = File(...)):
     
 # Endpoint to inspect mp4 tracks 
 @app.post("/inspect_mp4_tracks")
-async def video_info(file: UploadFile = File(...)):
+async def inspect_mp4_tracks_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_container_mp4"
@@ -156,7 +156,7 @@ async def video_info(file: UploadFile = File(...)):
 
 # Endpoint to show the macroblocks and the motion vectors 
 @app.post("/macroblocks_motion_vectors")
-async def video_info(file: UploadFile = File(...)):
+async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input_mp4"
@@ -172,7 +172,7 @@ async def video_info(file: UploadFile = File(...)):
     
 # Endpoint to show the YUV histogram
 @app.post("/yuv_histrogram")
-async def video_info(file: UploadFile = File(...)):
+async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input_mp4"
