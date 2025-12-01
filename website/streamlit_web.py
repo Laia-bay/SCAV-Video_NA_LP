@@ -12,7 +12,9 @@ IMAGES_RESULTS_PATH = "image_results"
 
 
 st.set_page_config(page_title="SCAV final project NA&LP", layout="wide")
-st.title("SCAV final project NA&LP")
+
+st.markdown("<h1 style='text-align: center; color: red;'>SCAV final project NA & LP</h1>", unsafe_allow_html=True)
+
 
 tab1, tab2, tab3 = st.tabs(["Home","Images","Videos"])
 
