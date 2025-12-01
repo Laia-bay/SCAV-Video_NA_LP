@@ -292,20 +292,25 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4") 
     
-# Endpoint to convert any input video into VP8
-@app.post("/convertor_vp8")
-async def convertor_vp8_endpoint(file: UploadFile = File(...)):
+# Endpoint to convert any input video into VP8, VP9, h265 & AV1
+@app.post("/convert_video_format")
+async def convert_video_format_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_path = "image_results/test_convertor_vp8.webm"
+    output_vp8_path = "image_results/test_convert_vp8.webm"
+    output_vp9_path = "image_results/test_convert_vp9.webm"
 
     with open(input_path, "wb") as f:   
         f.write(video_bytes)
 
     stream = ffmpeg.input(input_path)
-    stream = ffmpeg.output(stream,output_path,vcodec="vp8",acodec="libvorbis",**{"q:v": 5})
+    stream = ffmpeg.output(stream,output_vp8_path,vcodec="vp8",acodec="libvorbis",**{"q:v": 20})
     ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
 
-    with open(output_path, "rb") as f:
+    stream = ffmpeg.input(input_path)
+    stream = ffmpeg.output(stream,output_vp9_path,vcodec="vp9",acodec="libvorbis",**{"q:v": 20})
+    ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    with open(output_vp9_path, "rb") as f:
         return Response(content=f.read(), media_type="video/webm") 
