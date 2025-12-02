@@ -119,7 +119,6 @@ async def video_info_endpoint(file: UploadFile = File(...)):
     return JSONResponse(content=five_data)
 
 @app.post("/create_BBB_container")
-async def create_BBB_container_endpoint(file: UploadFile = File(...)):
 async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio: bool = Form(...), MP3_audio: bool = Form(...), AC3_audio: bool = Form(...)):
     video_bytes = await file.read()
 
@@ -136,25 +135,12 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
     # cut first 20 seconds of the video
     ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="libx264").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
-    # create AAC mono audio
-    ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
     audio_tracks = []
 
-    # create MP3 stereo audio with lower bitrate
-    # initial bitrate = 208216 bps (we obtained this value using the previous endpoint that showed the data of the video)
-    ffmpeg.input(trimmed_video_path).output(mp3_audio_path,acodec="mp3",ac=2,audio_bitrate="128k").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-    
-    # create AC3 mono audio
-    ffmpeg.input(trimmed_video_path).output(ac3_audio_path,acodec="ac3",ac=2).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
     if AAC_audio:
         ffmpeg.input(trimmed_video_path).output(aac_audio_path, acodec="aac", ac=1).run(overwrite_output=True)
         audio_tracks.append(aac_audio_path)
 
-    # package everything into a single MP4 container
-    video_input = ffmpeg.input(trimmed_video_path)
-    aac_input = ffmpeg.input(aac_audio_path)
-    mp3_input = ffmpeg.input(mp3_audio_path)
-    ac3_input = ffmpeg.input(ac3_audio_path)
     if MP3_audio:
         ffmpeg.input(trimmed_video_path).output(mp3_audio_path, acodec="mp3", ac=2).run(overwrite_output=True)
         audio_tracks.append(mp3_audio_path)
@@ -163,20 +149,9 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
         ffmpeg.input(trimmed_video_path).output(ac3_audio_path, acodec="ac3", ac=2).run(overwrite_output=True)
         audio_tracks.append(ac3_audio_path)
 
-    ffmpeg.output(
-        video_input, aac_input, mp3_input, ac3_input,
-        output_path,
-        vcodec="copy",
-        acodec="copy",
-    ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
     if not audio_tracks:
         return JSONResponse({"ERROR": "Select at least ONE audio track"}, status_code=400)
 
-    os.remove(input_path)
-    os.remove(trimmed_video_path)
-    os.remove(aac_audio_path)
-    os.remove(mp3_audio_path)
-    os.remove(ac3_audio_path)
     video_input = ffmpeg.input(trimmed_video_path)
     input = [video_input] + [ffmpeg.input(a) for a in audio_tracks]
     
@@ -188,7 +163,6 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
    
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
-    
 
 # Endpoint to inspect mp4 tracks 
 @app.post("/inspect_mp4_tracks")
@@ -228,7 +202,6 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
         return Response(content=f.read(), media_type="video/mp4") 
     
 # Endpoint to show the YUV histogram
-@app.post("/yuv_histrogram")
 @app.post("/yuv_histogram")
 async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
@@ -244,7 +217,7 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     os.remove(input_path)
     
     with open(output_path, "rb") as f:
-        return Response(content=f.read(), media_type="video/mp4")         return Response(content=f.read(), media_type="video/mp4") 
+        return Response(content=f.read(), media_type="video/mp4") 
     
 # Endpoint to convert any input video into VP8, VP9, h265 & AV1
 @app.post("/convert_video_format")
