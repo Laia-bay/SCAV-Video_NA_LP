@@ -298,19 +298,27 @@ async def convert_video_format_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_vp8_path = "image_results/test_convert_vp8.webm"
-    output_vp9_path = "image_results/test_convert_vp9.webm"
+    #output_vp8_path = "image_results/test_convert_vp8.webm"
+    #output_vp9_path = "image_results/test_convert_vp9.webm"
+    output_h265_path = "image_results/test_convert_h265.mp4"
 
     with open(input_path, "wb") as f:   
         f.write(video_bytes)
 
+    # Convert video to VP8
+    #stream = ffmpeg.input(input_path)
+    #stream = ffmpeg.output(stream,output_vp8_path,vcodec="vp8",acodec="libvorbis",**{"q:v": 20})
+    #ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    # Convert video to VP9
+    #stream = ffmpeg.input(input_path)
+    #stream = ffmpeg.output(stream,output_vp9_path,vcodec="vp9",acodec="libvorbis",**{"q:v": 20})
+    #ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+    # Convert video to h265
     stream = ffmpeg.input(input_path)
-    stream = ffmpeg.output(stream,output_vp8_path,vcodec="vp8",acodec="libvorbis",**{"q:v": 20})
+    stream = ffmpeg.output(stream,output_h265_path,vcodec="libx265",acodec="aac",**{"q:v": 20})
     ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
 
-    stream = ffmpeg.input(input_path)
-    stream = ffmpeg.output(stream,output_vp9_path,vcodec="vp9",acodec="libvorbis",**{"q:v": 20})
-    ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
-
-    with open(output_vp9_path, "rb") as f:
-        return Response(content=f.read(), media_type="video/webm") 
+    with open(output_h265_path, "rb") as f:
+        return Response(content=f.read(), media_type="video/mp4") 
