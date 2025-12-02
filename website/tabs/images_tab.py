@@ -111,6 +111,6 @@ def display():
             return
         
         img = Image.open(io.BytesIO(response.content))
-        col2.image(img, caption=f"Processed result: {transformation}", use_container_width=True)
+        col2.image(img, caption=f"Processed result: {transformation}")
         st.write("Image saved in 'image_results' folder.")
 
