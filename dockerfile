@@ -18,6 +18,7 @@ COPY website/tabs/videos_tab.py .
 
 COPY images ./images
 COPY image_results ./image_results
+COPY video_results ./video_results
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt

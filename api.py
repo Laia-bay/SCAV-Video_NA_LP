@@ -206,13 +206,13 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
 async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "images/temp_input_mp4"
+    input_path = "images/temp_input.mp4"
     output_path = "image_results/test_yuv_histogram.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
 
-    ffmpeg.input(input_path).output(output_path,vf="histogram").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+    ffmpeg.input(input_path).output(output_path,vf="histogram", vcodec="libx264",pix_fmt="yuv420p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
     
     os.remove(input_path)
     
