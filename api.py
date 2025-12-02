@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
 from fastapi.responses import Response, JSONResponse
 from PIL import Image
 import numpy as np
@@ -73,8 +73,7 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
 
 # Endpoint to modify the chroma subsampling 
 @app.post("/chroma_subsampling")
-async def chroma_subsampling_endpoint(file: UploadFile = File(...), Chroma_Subsampling: str = None, 
-                                      a: int = Form(...), x: int = Form(...), y: int = Form(...)):
+async def chroma_subsampling_endpoint(file: UploadFile = File(...), subsampling: str = Form(...)):
 
     img_bytes = await file.read()
 
@@ -84,12 +83,8 @@ async def chroma_subsampling_endpoint(file: UploadFile = File(...), Chroma_Subsa
     with open(input_path, "wb") as f:
         f.write(img_bytes)
 
-    if a !=4 or x == 3 or y == 3 or (x == 2 and y ==1) or (x==1 and y == 2) or x==0:
-        raise HTTPException(status_code = 400, 
-                            detail= "Chroma subsampling must have values 4:4:4, 4:2:2, 4:1:1, or 4:2:0")
-    else:
-        # Apply chroma subsampling using pix_fmt
-        ffmpeg.input(input_path).output(output_path, pix_fmt=f"yuv{a}{x}{y}p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+    # Apply chroma subsampling using pix_fmt
+    ffmpeg.input(input_path).output(output_path, pix_fmt=f"yuv{subsampling}p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
     
     os.remove(input_path)
     
@@ -124,18 +119,14 @@ async def video_info_endpoint(file: UploadFile = File(...)):
     return JSONResponse(content=five_data)
 
 @app.post("/create_BBB_container")
-async def create_BBB_container_endpoint(file: UploadFile = File(...), 
-                                        AAC_audio: bool = Form(...), MP3_audio: bool = Form(...), AC3_audio: bool = Form(...)):
+async def create_BBB_container_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_bbb_input.mp4"
     trimmed_video_path = "images/temp_bbb_trimmed.mp4"
-    if AAC_audio == True:
-        aac_audio_path = "images/aac_mono_audio.aac"
-    if MP3_audio == True:
-        mp3_audio_path = "images/mp3_stereo_audio.mp3"
-    if AC3_audio == True:
-        ac3_audio_path = "images/ac3_audio.ac3"
+    aac_audio_path = "images/aac_mono_audio.aac"
+    mp3_audio_path = "images/mp3_stereo_audio.mp3"
+    ac3_audio_path = "images/ac3_audio.ac3"
     output_path = "image_results/test_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
@@ -145,94 +136,33 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...),
     ffmpeg.input(input_path).output(trimmed_video_path,t=20,vcodec="libx264").run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
 
     # create AAC mono audio
-    if AAC_audio == True:
-        ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
-        aac_input = ffmpeg.input(aac_audio_path)
-    
+    ffmpeg.input(trimmed_video_path).output(aac_audio_path,acodec="aac",ac=1).run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+
     # create MP3 stereo audio with lower bitrate
     # initial bitrate = 208216 bps (we obtained this value using the previous endpoint that showed the data of the video)
-    if MP3_audio == True:
-        ffmpeg.input(trimmed_video_path).output(mp3_audio_path,acodec="mp3",ac=2,audio_bitrate="128k").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        mp3_input = ffmpeg.input(mp3_audio_path)
-   
+    ffmpeg.input(trimmed_video_path).output(mp3_audio_path,acodec="mp3",ac=2,audio_bitrate="128k").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+    
     # create AC3 mono audio
-    if AC3_audio == True:
-        ffmpeg.input(trimmed_video_path).output(ac3_audio_path,acodec="ac3",ac=2).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        ac3_input = ffmpeg.input(ac3_audio_path)
-        
+    ffmpeg.input(trimmed_video_path).output(ac3_audio_path,acodec="ac3",ac=2).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
     # package everything into a single MP4 container
     video_input = ffmpeg.input(trimmed_video_path)
-    if AAC_audio == True and MP3_audio == True and AC3_audio == True:
-        ffmpeg.output(
-            video_input, aac_input, mp3_input, ac3_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(aac_audio_path)
-        os.remove(mp3_audio_path)
-        os.remove(ac3_audio_path)
-    
-    if AAC_audio == True and MP3_audio == True and AC3_audio == False:
-        ffmpeg.output(
-            video_input, aac_input, mp3_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(aac_audio_path)
-        os.remove(mp3_audio_path)
+    aac_input = ffmpeg.input(aac_audio_path)
+    mp3_input = ffmpeg.input(mp3_audio_path)
+    ac3_input = ffmpeg.input(ac3_audio_path)
 
-    if AAC_audio == True and MP3_audio == False and AC3_audio == False:
-        ffmpeg.output(
-            video_input, aac_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(aac_audio_path)
-
-    if AAC_audio == True and MP3_audio == False and AC3_audio == True:
-        ffmpeg.output(
-            video_input, aac_input, ac3_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(aac_audio_path)
-        os.remove(ac3_audio_path)
-
-    if AAC_audio == False and MP3_audio == True and AC3_audio == True:
-        ffmpeg.output(
-            video_input, mp3_input, ac3_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(mp3_audio_path)
-        os.remove(ac3_audio_path)
-
-    if AAC_audio == False and MP3_audio == False and AC3_audio == True:
-        ffmpeg.output(
-            video_input, ac3_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(ac3_audio_path)
-
-    if AAC_audio == False and MP3_audio == True and AC3_audio == False:
-        ffmpeg.output(
-            video_input, mp3_input,
-            output_path,
-            vcodec="copy",
-            acodec="copy",
-        ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-        os.remove(mp3_audio_path)
+    ffmpeg.output(
+        video_input, aac_input, mp3_input, ac3_input,
+        output_path,
+        vcodec="copy",
+        acodec="copy",
+    ).run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
 
     os.remove(input_path)
     os.remove(trimmed_video_path)
-    
+    os.remove(aac_audio_path)
+    os.remove(mp3_audio_path)
+    os.remove(ac3_audio_path)
 
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
