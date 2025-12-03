@@ -222,13 +222,14 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     
 # Endpoint to convert any input video into VP8, VP9, h265 & AV1
 @app.post("/convert_video_format")
-async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool = Form(...), VP9: bool = Form(...), h265: bool = Form(...)):
+async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool = Form(...), VP9: bool = Form(...), h265: bool = Form(...), AV1: bool = Form(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
     output_vp8_path = "video_results/output_convert_vp8.webm"
     output_vp9_path = "video_results/output_convert_vp9.webm"
     output_h265_path = "video_results/output_convert_h265.mp4"
+    output_av1_path = "video_results/output_convert_av1.mp4"
 
     with open(input_path, "wb") as f:   
         f.write(video_bytes)
@@ -255,6 +256,13 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
         stream = ffmpeg.output(stream,output_h265_path,vcodec="libx265",acodec="aac",**{"q:v": 20})
         ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
         conversions.append(output_h265_path)
+
+    # Convert video to AV1
+    if AV1 == True:
+        stream = ffmpeg.input(input_path)
+        stream = ffmpeg.output(stream,output_av1_path,vcodec="libsvtav1",acodec="aac",**{"crf": 35, "preset": "6"})
+        ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
+        conversions.append(output_av1_path)
     
     if not conversions:
         return JSONResponse({"ERROR": "Select at least ONE video format to convert"}, status_code=400)

@@ -95,6 +95,7 @@ def display():
         VP8 = st.checkbox("VP8 video:")
         VP9 = st.checkbox("VP9 video:")
         h265 = st.checkbox("h265 video:")
+        AV1 = st.checkbox("AV1 video:")
 
 
 
@@ -129,7 +130,7 @@ def display():
                 data = {"AAC_audio": AAC, "MP3_audio": MP3, "AC3_audio": AC3}
                 response = requests.post(API_URL + endpoint2, files=files, data=data)
             elif processing == "Convert video format":
-                data = {"VP8": VP8, "VP9": VP9, "h265": h265}
+                data = {"VP8": VP8, "VP9": VP9, "h265": h265, "AV1": AV1}
                 response = requests.post(API_URL + endpoint2, files=files, data=data)
             
             else:
@@ -152,6 +153,8 @@ def display():
                 videos.append("VP9")
             if h265 == True:
                 videos.append("h265")
+            if AV1 == True:
+                videos.append("AV1")
             st.write(f"Video with codecs {videos} has been saved on 'video_results' folder.")
         if processing == "Macroblocks Motion Vectors":
             st.write("Video with macroblocks motion vectors has been saved on 'video_results' folder.")
