@@ -18,9 +18,12 @@ This project is based on two main components:
 2. **A Docker environment with FastAPI and Streamlit:**  
    - **FastAPI** acts as the backend.  
    - **Streamlit** acts as the frontend.  
-   - Streamlit provides an easy-to-use website where users can upload or select images and videos and apply several processing operations.  
-   - Streamlit calls the FastAPI backend to perform the selected operation and returns the result.  
-   - For video operations, Streamlit will only display an `"Video saved"` message instead of returning a processed video.
+
+Streamlit provides an easy-to-use website where users can upload or select images and videos and apply several processing operations.  
+
+Streamlit calls the FastAPI backend to perform the selected operation and returns the result.  
+
+For video operations, Streamlit will only display a *"Video saved"* message instead of returning a processed video.
 
 ---
 
@@ -91,4 +94,4 @@ That is all, we hope you like this project.
 
 Sincerely, 
 
-Nahia and Laia.
+**Nahia** and **Laia**.
