@@ -12,8 +12,8 @@ IMAGE_FOLDER = "images"
 RESULT_FOLDER = "image_results"
 RESULT_VIDEO_FOLDER = "video_results"
 
-os.makedirs(RESULT_FOLDER, exist_ok=True)   ## to make sure that the folder where the modified images will be saved exists.
-#os.makedirs(RESULT_VIDEO_FOLDER, exist_ok=True) 
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+os.makedirs(RESULT_VIDEO_FOLDER, exist_ok=True) 
 
 @app.post("/serpentine")
 async def serpentine_endpoint(file: UploadFile = File(...)):
@@ -56,8 +56,7 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
     img_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_path = "image_results/output_resized_video.mp4"
-    #output_path = "video_results/output_resized_video.mp4"
+    output_path = "video_results/output_resized_video.mp4"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
@@ -129,8 +128,7 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
     aac_audio_path = "images/aac_mono_audio.aac"
     mp3_audio_path = "images/mp3_stereo_audio.mp3"
     ac3_audio_path = "images/ac3_audio.ac3"
-    output_path = "image_results/output_BBB_container.mp4"
-    #output_path = "video_results/output_BBB_container.mp4"
+    output_path = "video_results/output_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -192,8 +190,7 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input_mp4"
-    output_path = "image_results/_output_test_macroblocks_motion_vectors.mp4"
-    #output_path = "video_results/output_test_macroblocks_motion_vectors.mp4"
+    output_path = "video_results/output_test_macroblocks_motion_vectors.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -211,8 +208,7 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_path = "image_results/output_test_yuv_histogram.mp4"
-    #output_path = "video_results/output_test_yuv_histogram.mp4"
+    output_path = "video_results/output_test_yuv_histogram.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -230,12 +226,9 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_vp8_path = "image_results/output_convert_vp8.webm"
-    output_vp9_path = "image_results/output_convert_vp9.webm"
-    output_h265_path = "image_results/output_convert_h265.mp4"
-    #output_vp8_path = "video_results/output_convert_vp8.webm"
-    #output_vp9_path = "video_results/output_convert_vp9.webm"
-    #output_h265_path = "video_results/output_convert_h265.mp4"
+    output_vp8_path = "video_results/output_convert_vp8.webm"
+    output_vp9_path = "video_results/output_convert_vp9.webm"
+    output_h265_path = "video_results/output_convert_h265.mp4"
 
     with open(input_path, "wb") as f:   
         f.write(video_bytes)
