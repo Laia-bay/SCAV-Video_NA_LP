@@ -1,0 +1,28 @@
+import streamlit as st
+import numpy as np
+import os
+from PIL import Image
+import requests
+from fastapi import HTTPException
+
+from tabs import home_tab, images_tab, videos_tab
+
+IMAGES_PATH = "images"
+IMAGES_RESULTS_PATH = "image_results"
+
+
+st.set_page_config(page_title="SCAV final project NA&LP", layout="wide")
+
+st.markdown("<h1 style='text-align: center; color: red;'>SCAV final project NA & LP</h1>", unsafe_allow_html=True)
+
+
+tab1, tab2, tab3 = st.tabs(["Home","Images","Videos"])
+
+with tab1:
+    home_tab.display()
+    
+with tab2: 
+    images_tab.display()
+    
+with tab3:
+    videos_tab.display()

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Query
 from fastapi.responses import Response, JSONResponse
 from PIL import Image
 import numpy as np
@@ -10,9 +10,10 @@ app = FastAPI()
 
 IMAGE_FOLDER = "images"
 RESULT_FOLDER = "image_results"
+RESULT_VIDEO_FOLDER = "video_results"
 
 os.makedirs(RESULT_FOLDER, exist_ok=True)   ## to make sure that the folder where the modified images will be saved exists.
-
+#os.makedirs(RESULT_VIDEO_FOLDER, exist_ok=True) 
 
 @app.post("/serpentine")
 async def serpentine_endpoint(file: UploadFile = File(...)):
@@ -55,7 +56,8 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
     img_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_path = "image_results/resized_video.mp4"
+    output_path = "image_results/output_resized_video.mp4"
+    #output_path = "video_results/output_resized_video.mp4"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
@@ -73,23 +75,18 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
 
 # Endpoint to modify the chroma subsampling 
 @app.post("/chroma_subsampling")
-async def chroma_subsampling_endpoint(file: UploadFile = File(...), Chroma_Subsampling: str = None, 
-                                      a: int = Form(...), x: int = Form(...), y: int = Form(...)):
+async def chroma_subsampling_endpoint(file: UploadFile = File(...), subsampling: str = Form(...)):
 
     img_bytes = await file.read()
 
     input_path = "images/temp_chroma_subsampling_input.jpg"
-    output_path = "image_results/test_chroma_subsampling.jpg"
+    output_path = "image_results/output_chroma_subsampling.jpg"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
 
-    if a !=4 or x == 3 or y == 3 or (x == 2 and y ==1) or (x==1 and y == 2) or x==0:
-        raise HTTPException(status_code = 400, 
-                            detail= "Chroma subsampling must have values 4:4:4, 4:2:2, 4:1:1, or 4:2:0")
-    else:
-        # Apply chroma subsampling using pix_fmt
-        ffmpeg.input(input_path).output(output_path, pix_fmt=f"yuv{a}{x}{y}p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+    # Apply chroma subsampling using pix_fmt
+    ffmpeg.input(input_path).output(output_path, pix_fmt=f"yuv{subsampling}p").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
     
     os.remove(input_path)
     
@@ -132,7 +129,8 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
     aac_audio_path = "images/aac_mono_audio.aac"
     mp3_audio_path = "images/mp3_stereo_audio.mp3"
     ac3_audio_path = "images/ac3_audio.ac3"
-    output_path = "image_results/test_BBB_container.mp4"
+    output_path = "image_results/output_BBB_container.mp4"
+    #output_path = "video_results/output_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -169,7 +167,6 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
 
-    
 # Endpoint to inspect mp4 tracks 
 @app.post("/inspect_mp4_tracks")
 async def inspect_mp4_tracks_endpoint(file: UploadFile = File(...)):
@@ -195,7 +192,8 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input_mp4"
-    output_path = "image_results/test_macroblocks_motion_vectors.mp4"
+    output_path = "image_results/_output_test_macroblocks_motion_vectors.mp4"
+    #output_path = "video_results/output_test_macroblocks_motion_vectors.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -208,12 +206,13 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
         return Response(content=f.read(), media_type="video/mp4") 
     
 # Endpoint to show the YUV histogram
-@app.post("/yuv_histrogram")
+@app.post("/yuv_histogram")
 async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
-    input_path = "images/temp_input_mp4"
-    output_path = "image_results/test_yuv_histogram.mp4"
+    input_path = "images/temp_input.mp4"
+    output_path = "image_results/output_test_yuv_histogram.mp4"
+    #output_path = "video_results/output_test_yuv_histogram.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -231,9 +230,12 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_vp8_path = "image_results/test_convert_vp8.webm"
-    output_vp9_path = "image_results/test_convert_vp9.webm"
-    output_h265_path = "image_results/test_convert_h265.mp4"
+    output_vp8_path = "image_results/output_convert_vp8.webm"
+    output_vp9_path = "image_results/output_convert_vp9.webm"
+    output_h265_path = "image_results/output_convert_h265.mp4"
+    #output_vp8_path = "video_results/output_convert_vp8.webm"
+    #output_vp9_path = "video_results/output_convert_vp9.webm"
+    #output_h265_path = "video_results/output_convert_h265.mp4"
 
     with open(input_path, "wb") as f:   
         f.write(video_bytes)
@@ -263,7 +265,7 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
     
     if not conversions:
         return JSONResponse({"ERROR": "Select at least ONE video format to convert"}, status_code=400)
-    
+    os.remove(input_path)
     if len(conversions) == 1:
         output_file = conversions[0]
         with open(output_file, "rb") as f:
@@ -276,10 +278,7 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
         
         return Response(content=file_bytes, media_type=media_type)
     
-    response = {"converted_files": conversions.copy()}
     
-    for path in [output_h265_path, output_vp9_path, output_vp8_path, input_path]:
-        if os.path.exists(path):
-            os.remove(path)
+        
     
-    return JSONResponse(response)
+   

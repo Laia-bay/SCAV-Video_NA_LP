@@ -7,3 +7,4 @@ scipy
 ffmpeg-python
 python-multipart
 requests
+streamlit
