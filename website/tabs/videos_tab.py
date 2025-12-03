@@ -22,7 +22,7 @@ def display():
     st.write("")
     
     col1,col2 = st.columns(2)
-    input_video = col1.file_uploader("Upload an image:","mp4")
+    input_video = col1.file_uploader("Upload a video to get its information:","mp4")
 
     if input_video:
         video_name = input_video.name
@@ -44,7 +44,7 @@ def display():
         elif information == "YUV histogram":
             endpoint = "/yuv_histogram"
         else:
-            st.warning("Please select an existing information that you want to know")
+            st.warning("Information not available. Please select one of the showed options.")
             return
         
         with st.spinner("Loading..."):
@@ -67,8 +67,97 @@ def display():
         else:
             col1.write("Something went wrong. Try again")
         
+    st.subheader("Processing & encoding section")
+    st.write("")
+    st.write("This is the processing & encoding section")
+
+    input_video2 = st.file_uploader("Upload a video to process it:","mp4")
+
+    if input_video2:
+        video_name2 = input_video2.name
+        video_bytes2 = input_video2.read()
+    
+    processing_options = ["---", "Resize video", "Create BBB container", "Macroblocks Motion Vectors", "Convert video format"]
+    processing = st.selectbox("Select the processing transformation that you want to apply:", processing_options)
+
+    if processing == ("Resize video"):
+        width = st.number_input("Select the desired width:", 1, 1279)
+        height = st.number_input("Select the desired height:", 1, 719)
+
+    elif processing == ("Create BBB container"):
+        audios = []
+        AAC = st.checkbox("AAC audio:")
+        MP3 = st.checkbox("MP3 audio:")
+        AC3 = st.checkbox("AC3 audio:")
+    
+    elif processing == ("Convert video format"):
+        videos = []
+        VP8 = st.checkbox("VP8 video:")
+        VP9 = st.checkbox("VP9 video:")
+        h265 = st.checkbox("h265 video:")
 
 
 
-    processing_options = ["---", "Resize video", "Create BBB container", "Macroblocks Motion Vectors", ""]
+    if (st.button("Process video")):
+        if (processing == "---"):
+            st.warning("Please select a processing option.")
+            return
+        elif (processing == "Resize video"):
+            if width != 0 and height != 0:
+                endpoint2 = "/resize_video"
+            else: 
+                st.warning("Please write the desired width and height.")
+                return
+            
+        elif (processing == "Create BBB container"):
+            endpoint2 = "/create_BBB_container"
+        elif (processing == "Macroblocks Motion Vectors"):
+            endpoint2 = "/macroblocks_motion_vectors"
+        elif (processing == "Convert video format"):
+            endpoint2 = "/convert_video_format"
+        else:
+            st.warning("Processing option not available. Please select one of the showed options.")
+            return
+        
+        with st.spinner("Processing..."):
+            files = {"file": (video_name2, video_bytes2, "video/mp4")}
+            
+            if processing == "Resize video":
+                data = {"width":  width, "height": height}
+                response = requests.post(API_URL + endpoint2, files=files, data=data)
+            elif processing == "Create BBB container":
+                data = {"AAC_audio": AAC, "MP3_audio": MP3, "AC3_audio": AC3}
+                response = requests.post(API_URL + endpoint2, files=files, data=data)
+            elif processing == "Convert video format":
+                data = {"VP8": VP8, "VP9": VP9, "h265": h265}
+                response = requests.post(API_URL + endpoint2, files=files, data=data)
+            
+            else:
+                response = requests.post(API_URL + endpoint2, files=files)
+
+        if processing == "Resize video":
+            st.write("Resized video has been saved on 'video_results' folder.")
+        if processing == "Create BBB container":
+            if AAC == True:
+                audios.append("AAC")
+            if MP3 == True:
+                audios.append("MP3")
+            if AC3 == True:
+                audios.append("AC3")
+            st.write(f"BBB video with audios {audios} has been saved on 'video_results' folder.")
+        if processing == "Convert video format":
+            if VP8 == True:
+                videos.append("VP8")
+            if VP9 == True:
+                videos.append("VP9")
+            if h265 == True:
+                videos.append("h265")
+            st.write(f"Video with codecs {videos} has been saved on 'video_results' folder.")
+        if processing == "Macroblocks Motion Vectors":
+            st.write("Video with macroblocks motion vectors has been saved on 'video_results' folder.")
+
+        if response.status_code != 200:
+            st.error("Error processing video.")
+            st.text(response.text)
+            return
 

@@ -56,8 +56,8 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
     img_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_path = "image_results/resized_video.mp4"
-    #output_path = "video_results/resized_video.mp4"
+    output_path = "image_results/output_resized_video.mp4"
+    #output_path = "video_results/output_resized_video.mp4"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
@@ -80,7 +80,7 @@ async def chroma_subsampling_endpoint(file: UploadFile = File(...), subsampling:
     img_bytes = await file.read()
 
     input_path = "images/temp_chroma_subsampling_input.jpg"
-    output_path = "image_results/test_chroma_subsampling.jpg"
+    output_path = "image_results/output_chroma_subsampling.jpg"
 
     with open(input_path, "wb") as f:
         f.write(img_bytes)
@@ -129,8 +129,8 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
     aac_audio_path = "images/aac_mono_audio.aac"
     mp3_audio_path = "images/mp3_stereo_audio.mp3"
     ac3_audio_path = "images/ac3_audio.ac3"
-    output_path = "image_results/test_BBB_container.mp4"
-    #output_path = "video_results/test_BBB_container.mp4"
+    output_path = "image_results/output_BBB_container.mp4"
+    #output_path = "video_results/output_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -192,8 +192,8 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input_mp4"
-    output_path = "image_results/test_macroblocks_motion_vectors.mp4"
-    #output_path = "video_results/test_macroblocks_motion_vectors.mp4"
+    output_path = "image_results/_output_test_macroblocks_motion_vectors.mp4"
+    #output_path = "video_results/output_test_macroblocks_motion_vectors.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -211,8 +211,8 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_path = "image_results/test_yuv_histogram.mp4"
-    #output_path = "video_results/test_yuv_histogram.mp4"
+    output_path = "image_results/output_test_yuv_histogram.mp4"
+    #output_path = "video_results/output_test_yuv_histogram.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -230,12 +230,12 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
     video_bytes = await file.read()
 
     input_path = "images/temp_input.mp4"
-    output_vp8_path = "image_results/test_convert_vp8.webm"
-    output_vp9_path = "image_results/test_convert_vp9.webm"
-    output_h265_path = "image_results/test_convert_h265.mp4"
-    #output_vp8_path = "video_results/test_convert_vp8.webm"
-    #output_vp9_path = "video_results/test_convert_vp9.webm"
-    #output_h265_path = "video_results/test_convert_h265.mp4"
+    output_vp8_path = "image_results/output_convert_vp8.webm"
+    output_vp9_path = "image_results/output_convert_vp9.webm"
+    output_h265_path = "image_results/output_convert_h265.mp4"
+    #output_vp8_path = "video_results/output_convert_vp8.webm"
+    #output_vp9_path = "video_results/output_convert_vp9.webm"
+    #output_h265_path = "video_results/output_convert_h265.mp4"
 
     with open(input_path, "wb") as f:   
         f.write(video_bytes)
@@ -265,7 +265,7 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
     
     if not conversions:
         return JSONResponse({"ERROR": "Select at least ONE video format to convert"}, status_code=400)
-    
+    os.remove(input_path)
     if len(conversions) == 1:
         output_file = conversions[0]
         with open(output_file, "rb") as f:
@@ -278,11 +278,7 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
         
         return Response(content=file_bytes, media_type=media_type)
     
-    response = {"converted_files": conversions.copy()}
     
-    for path in [output_h265_path, output_vp9_path, output_vp8_path, input_path]:
-        if os.path.exists(path):
-            os.remove(path)
+        
     
-    return JSONResponse(response)
    
