@@ -77,7 +77,7 @@ def display():
         video_name2 = input_video2.name
         video_bytes2 = input_video2.read()
     
-    processing_options = ["---", "Resize video", "Create BBB container", "Macroblocks Motion Vectors", "Convert video format"]
+    processing_options = ["---", "Resize video", "Create BBB container", "Macroblocks Motion Vectors", "Convert video format", "Encoding ladder"]
     processing = st.selectbox("Select the processing transformation that you want to apply:", processing_options)
 
     if processing == ("Resize video"):
@@ -116,6 +116,8 @@ def display():
             endpoint2 = "/macroblocks_motion_vectors"
         elif (processing == "Convert video format"):
             endpoint2 = "/convert_video_format"
+        elif (processing == "Encoding ladder"):
+            endpoint2 = "/encoding_ladder"
         else:
             st.warning("Processing option not available. Please select one of the showed options.")
             return
@@ -132,7 +134,10 @@ def display():
             elif processing == "Convert video format":
                 data = {"VP8": VP8, "VP9": VP9, "h265": h265, "AV1": AV1}
                 response = requests.post(API_URL + endpoint2, files=files, data=data)
-            
+            elif processing == "Encoding ladder":
+                data = 0 #s'eliminara després, es per a que no em doni error al tenir la linea d'abaix comentada
+                #response = requests.post(API_URL + endpoint2, files=files)
+                
             else:
                 response = requests.post(API_URL + endpoint2, files=files)
 
@@ -158,6 +163,8 @@ def display():
             st.write(f"Video with codecs {videos} has been saved on 'video_results' folder.")
         if processing == "Macroblocks Motion Vectors":
             st.write("Video with macroblocks motion vectors has been saved on 'video_results' folder.")
+        if processing == "Encoding ladder":
+            st.write("Video with encoded ladder has been saved on 'video_results' folder.")
 
         if response.status_code != 200:
             st.error("Error processing video.")
