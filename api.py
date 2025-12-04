@@ -51,6 +51,9 @@ async def bw_endpoint(file: UploadFile = File(...)):
         return Response(content=f.read(), media_type="image/jpg")
     
 
+def resize_video(input_file, output_file, width, height):
+    ffmpeg.input(input_file).output(output_file, vf=f"scale={width}:{height}").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
 @app.post("/resize_video")
 async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(...), height: int = Form(...)):
     img_bytes = await file.read()
@@ -65,12 +68,13 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
             status_code=400,
             detail="Size must be smaller than original:1280x720.")
     else:
-        ffmpeg.input(input_path).output(output_path, vf=f"scale={width}:{height}").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+        resize_video(input_path, output_path, width, height)
     
     os.remove(input_path)
     
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
+
 
 # Endpoint to modify the chroma subsampling 
 @app.post("/chroma_subsampling")
@@ -91,6 +95,7 @@ async def chroma_subsampling_endpoint(file: UploadFile = File(...), subsampling:
     
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="image/jpg")
+
 
 # Endpoint to read the video info and print at least 5 relevant data from the video 
 @app.post("/video_info")
@@ -118,6 +123,7 @@ async def video_info_endpoint(file: UploadFile = File(...)):
     os.remove(input_path)
 
     return JSONResponse(content=five_data)
+
 
 @app.post("/create_BBB_container")
 async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio: bool = Form(...), MP3_audio: bool = Form(...), AC3_audio: bool = Form(...)):
@@ -165,6 +171,7 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
 
+
 # Endpoint to inspect mp4 tracks 
 @app.post("/inspect_mp4_tracks")
 async def inspect_mp4_tracks_endpoint(file: UploadFile = File(...)):
@@ -184,6 +191,7 @@ async def inspect_mp4_tracks_endpoint(file: UploadFile = File(...)):
     
     return {"total_tracks": len(probe["streams"]),"video_tracks": len(video_tracks),"audio_tracks": len(audio_tracks)}
 
+
 # Endpoint to show the macroblocks and the motion vectors 
 @app.post("/macroblocks_motion_vectors")
 async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
@@ -201,7 +209,8 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
     
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4") 
-    
+
+
 # Endpoint to show the YUV histogram
 @app.post("/yuv_histogram")
 async def yuv_histogram_endpoint(file: UploadFile = File(...)):
@@ -219,7 +228,8 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4") 
-    
+
+
 # Endpoint to convert any input video into VP8, VP9, h265 & AV1
 @app.post("/convert_video_format")
 async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool = Form(...), VP9: bool = Form(...), h265: bool = Form(...), AV1: bool = Form(...)):
@@ -277,6 +287,7 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
             media_type = "video/mp4"
         
         return Response(content=file_bytes, media_type=media_type)
+ 
     
 # Endpoint to do an encoding ladder 
 @app.post("/encoding_ladder")
@@ -290,11 +301,11 @@ async def encoding_ladder_endpoint(file: UploadFile = File(...), r1080p: bool = 
         f.write(video_bytes)
 
     ladder_options = {
-        "1080p": ("1920:1080", "5000k"),
-        "720p":  ("1280:720",  "3000k"),
-        "480p":  ("854:480",   "1500k"),
-        "360p":  ("640:360",   "800k"),
-        "240p":  ("426:240",   "400k")
+        "1080p": (1920, 1080),
+        "720p":  (1280, 720),
+        "480p":  (854, 480),
+        "360p":  (640, 360),
+        "240p":  (426, 240)
     }
     
     ladder = []
@@ -310,12 +321,10 @@ async def encoding_ladder_endpoint(file: UploadFile = File(...), r1080p: bool = 
 
     generated_files = []
 
-    for name in ladder:
-        resolution, bitrate = ladder_options[name]
-        output_path = f"video_results/output_{name}.mp4"
-
-        ffmpeg.input(input_path).output(output_path,vcodec="libx264",acodec="aac",video_bitrate=bitrate,vf=f"scale={resolution}").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
-
+    for resolution in ladder:
+        width, height = ladder_options[resolution]
+        output_path = f"video_results/output_{resolution}.mp4"
+        resize_video(input_path, output_path, width, height)
         generated_files.append(output_path)
     
     os.remove(input_path)
