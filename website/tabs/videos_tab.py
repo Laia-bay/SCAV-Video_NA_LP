@@ -96,8 +96,14 @@ def display():
         VP9 = st.checkbox("VP9 video:")
         h265 = st.checkbox("h265 video:")
         AV1 = st.checkbox("AV1 video:")
-
-
+    
+    elif processing == ("Encoding ladder"):
+        videos = []
+        r1080p = st.checkbox("1080p:")
+        r720p = st.checkbox("720p:")
+        r480p = st.checkbox("480p:")
+        r360p = st.checkbox("360p:")
+        r240p = st.checkbox("240p:")
 
     if (st.button("Process video")):
         if (processing == "---"):
@@ -135,9 +141,8 @@ def display():
                 data = {"VP8": VP8, "VP9": VP9, "h265": h265, "AV1": AV1}
                 response = requests.post(API_URL + endpoint2, files=files, data=data)
             elif processing == "Encoding ladder":
-                data = 0 #s'eliminara després, es per a que no em doni error al tenir la linea d'abaix comentada
-                #response = requests.post(API_URL + endpoint2, files=files)
-                
+                data = {"r1080p": r1080p, "r720p": r720p, "r480p": r480p, "r360p": r360p, "r240p": r240p}
+                response = requests.post(API_URL + endpoint2, files=files, data=data)
             else:
                 response = requests.post(API_URL + endpoint2, files=files)
 
@@ -164,7 +169,17 @@ def display():
         if processing == "Macroblocks Motion Vectors":
             st.write("Video with macroblocks motion vectors has been saved on 'video_results' folder.")
         if processing == "Encoding ladder":
-            st.write("Video with encoded ladder has been saved on 'video_results' folder.")
+            if r1080p == True:
+                videos.append("1080p")
+            if r720p == True:
+                videos.append("720p")
+            if r480p == True:
+                videos.append("480p")
+            if r360p == True:
+                videos.append("360p")
+            if r240p == True:
+                videos.append("240p")
+            st.write(f"Video with encoded ladder {videos} has been saved on 'video_results' folder.")
 
         if response.status_code != 200:
             st.error("Error processing video.")

@@ -242,7 +242,6 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
         ffmpeg.run(stream,capture_stdout=True, capture_stderr=True, overwrite_output=True)
         conversions.append(output_vp8_path)
         
-
     # Convert video to VP9
     if VP9 == True:
         stream = ffmpeg.input(input_path)
@@ -279,7 +278,47 @@ async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool 
         
         return Response(content=file_bytes, media_type=media_type)
     
+# Endpoint to do an encoding ladder 
+@app.post("/encoding_ladder")
+async def encoding_ladder_endpoint(file: UploadFile = File(...), r1080p: bool = Form(False), r720p: bool = Form(False), r480p: bool = Form(False), r360p: bool = Form(False), r240p: bool = Form(False)):
     
-        
+    video_bytes = await file.read()
+
+    input_path = "images/temp_encoding_ladder_input.mp4"
+
+    with open(input_path, "wb") as f:
+        f.write(video_bytes)
+
+    ladder_options = {
+        "1080p": ("1920:1080", "5000k"),
+        "720p":  ("1280:720",  "3000k"),
+        "480p":  ("854:480",   "1500k"),
+        "360p":  ("640:360",   "800k"),
+        "240p":  ("426:240",   "400k")
+    }
     
-   
+    ladder = []
+
+    if r1080p: ladder.append("1080p")
+    if r720p:  ladder.append("720p")
+    if r480p:  ladder.append("480p")
+    if r360p:  ladder.append("360p")
+    if r240p:  ladder.append("240p")
+
+    if not ladder:
+        return JSONResponse({"ERROR": "Select at least ONE ladder option"}, status_code=400)
+
+    generated_files = []
+
+    for name in ladder:
+        resolution, bitrate = ladder_options[name]
+        output_path = f"video_results/output_{name}.mp4"
+
+        ffmpeg.input(input_path).output(output_path,vcodec="libx264",acodec="aac",video_bitrate=bitrate,vf=f"scale={resolution}").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
+
+        generated_files.append(output_path)
+    
+    os.remove(input_path)
+
+    with open(output_path, "rb") as f:
+        return Response(content=f.read(), media_type="video/mp4")   
