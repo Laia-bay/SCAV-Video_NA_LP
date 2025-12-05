@@ -59,11 +59,16 @@ def display():
             image_bytes = f.read()
     
     
-    processing_options = ["---","Read image in Serpentine pattern", "Convert image to grayscale", "Chroma Subsampling"]
+    processing_options = ["---","Resize image", "Read image in Serpentine pattern", "Convert image to grayscale","Chroma Subsampling"]
     transformation = st.selectbox("Select the processing that you want to do",processing_options, 0)
 
+    
+    if transformation == "Resize image":
+        width = st.number_input("Select the desired width:", 1)
+        height = st.number_input("Select the desired height:", 1)
+    
     if transformation == "Chroma Subsampling":
-        CS_options = ["---", "4:4:4","4:2:2", "4:1:1", "4:2:0"]
+        CS_options = ["---", "4:4:4","4:2:2", "4:1:1"]
         string_vals = str(000)
         values = st.selectbox("Select the chroma subsampling that you want to apply:", CS_options)
         if values == "4:4:4":
@@ -72,10 +77,9 @@ def display():
             string_vals = str(422)
         elif values == "4:1:1":
             string_vals = str(411)
-        elif values == "4:2:0":
-            string_vals == str(420)
         else:
             string_vals = str(000)
+
         
 
     if(st.button("Process image")):
@@ -83,10 +87,16 @@ def display():
         if transformation == "---":
             st.warning("Please select a processing operation")
             return
+        elif transformation == "Resize image":
+            endpoint = "/resize_image"
         elif transformation == "Read image in Serpentine pattern":
             endpoint = "/serpentine"
         elif transformation == "Convert image to grayscale":
             endpoint = "/B&W"
+        elif transformation == "Get DTC values of image":
+            endpoint = "/dct"
+        elif transformation == "Get DWT values of image":
+            endpoint = "/dwt"
         elif transformation == "Chroma Subsampling":
             if string_vals == "000":
                 st.warning("Please select a correct chroma subsampling option")
@@ -102,6 +112,9 @@ def display():
             if transformation == "Chroma Subsampling":
                 data = {"subsampling":  string_vals}
                 response = requests.post(API_URL + endpoint, files=files, data=data)
+            elif transformation == "Resize image":
+                data = {"width": width, "height": height}
+                response = requests.post(API_URL + endpoint, files=files, data=data)
             else:
                 response = requests.post(API_URL + endpoint, files=files)
 
@@ -113,4 +126,5 @@ def display():
         img = Image.open(io.BytesIO(response.content))
         col2.image(img, caption=f"Processed result: {transformation}")
         st.write("Image saved in 'image_results' folder.")
+
 

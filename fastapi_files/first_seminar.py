@@ -98,26 +98,32 @@ class black_white:
     
 class RLE:
     def run_length_encoding(datastream):
-        c = 0
         count = 0
+        rle = ""
 
-        for x in range (len(datastream)):
+        for c in range (len(datastream)):
             if datastream[c] == '0':
                 count=count+1
 
-            if datastream[c + 1] != '0':
-                print("0"+ str(count), end='')
             else:
-                print(datastream[c], end='')
-            c = c+1
+                if count > 0:
+                    rle = rle + "0" + str(count)
+                    count = 0
+                rle = rle + datastream[c]
+        
+        ## if datastream ends in 0...
+        if count >0:
+            rle = rle + "0" + str(count)
+        
+        return rle
 
 class DCT:
-    def dct_conversion (input_file,serpentine_implemented, bw_implemented):
-        if serpentine_implemented == False:
+    def dct_conversion (input_file,serpentine, bw):
+        if serpentine == True:
             serpentine_im = serpentine_pattern.serpentine(input_file, "image_results/example_serpentine.jpg")
             input_file = serpentine_im
 
-        if bw_implemented == False:
+        if bw == True:
             grayscale_im = black_white.grayscale_image(input_file, 'image_results/example_bw_image.jpg')
             input_file = grayscale_im
         
@@ -133,12 +139,12 @@ class DCT:
         return idct_values
     
 class DWT:
-    def dwt_conversion (input_file, serpentine_implemented, bw_implemented):
-        if serpentine_implemented == False:
+    def dwt_conversion (input_file, serpentine, bw):
+        if serpentine == True:
             serpentine_im = serpentine_pattern.serpentine(input_file, "image_results/example_serpentine.jpg")
             input_file = serpentine_im
 
-        if bw_implemented == False:
+        if bw == True:
             grayscale_im = black_white.grayscale_image(input_file, 'image_results/example_bw_image.jpg')
             input_file = grayscale_im
 

@@ -32,7 +32,7 @@ For video operations, Streamlit will only display a *"Video saved"* message inst
 To build the Docker container, run:
 
 ```cmd
-docker-compose build seminar01
+docker-compose build
 ```
 ---
 
@@ -86,6 +86,21 @@ Resulting videos follow the naming format: *output_{operation_done}.mp4* or *out
 Videos are stored in the video_results folder.
 
 You can use the Google Drive videos or upload one of your own.
+
+---
+
+## Unit Tests
+
+On the docker there is also a folder called "tests" with 3 different files. 
+1. **conftest.py**: creates the unit tests.
+2. **test_first_seminar.py**: tests the file *"first_seminar.py"*.
+3. **test_api.py**: tests the file *"api.py"*.
+
+If you want to run these tests, you must write on the CMD
+
+````cmd
+pytest -q
+````
 
 ---
 

@@ -3,7 +3,7 @@
 services:
   api:
     build: .
-    image: seminar01:latest
+    image: final_project:latest
     ports:
       - "8000:8000"
       - "8501:8501"
