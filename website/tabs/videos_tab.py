@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 import requests
 
 BBB = "images/BBB.jpg"
@@ -29,7 +28,7 @@ def display():
         video_bytes = input_video.read()
     
     col2.image(BBB, "Big Buck Bunny movie video")
-    info_options = ["---", "5 points of information", "Inspect mp4 tracks", "YUV histogram"]
+    info_options = ["---", "5 points of information", "Inspect mp4 tracks", "YUV histogram", "Macroblocks Motion Vectors"]
     information = col1.selectbox("Select the information of the video that you want", info_options)
     
     
@@ -43,6 +42,8 @@ def display():
             endpoint = "/inspect_mp4_tracks"
         elif information == "YUV histogram":
             endpoint = "/yuv_histogram"
+        elif information == "Macroblocks Motion Vectors":
+            endpoint = "/macroblocks_motion_vectors"
         else:
             st.warning("Information not available. Please select one of the showed options.")
             return
@@ -64,6 +65,9 @@ def display():
         elif information == "YUV histogram":
             col1.write("YUV histogram video has been saved on 'video_results' folder.")
         
+        elif information == "Macroblocks Motion Vectors":
+            col1.write("Macroblocks Motion Vectors video has been saved on 'video_results' folder.")
+        
         else:
             col1.write("Something went wrong. Try again")
         
@@ -77,7 +81,7 @@ def display():
         video_name2 = input_video2.name
         video_bytes2 = input_video2.read()
     
-    processing_options = ["---", "Resize video", "Create BBB container", "Macroblocks Motion Vectors", "Convert video format", "Encoding ladder"]
+    processing_options = ["---", "Resize video", "Create BBB container", "Convert video format", "Encoding ladder"]
     processing = st.selectbox("Select the processing transformation that you want to apply:", processing_options)
 
     if processing == ("Resize video"):
@@ -118,8 +122,6 @@ def display():
             
         elif (processing == "Create BBB container"):
             endpoint2 = "/create_BBB_container"
-        elif (processing == "Macroblocks Motion Vectors"):
-            endpoint2 = "/macroblocks_motion_vectors"
         elif (processing == "Convert video format"):
             endpoint2 = "/convert_video_format"
         elif (processing == "Encoding ladder"):
@@ -166,8 +168,6 @@ def display():
             if AV1 == True:
                 videos.append("AV1")
             st.write(f"Video with codecs {videos} has been saved on 'video_results' folder.")
-        if processing == "Macroblocks Motion Vectors":
-            st.write("Video with macroblocks motion vectors has been saved on 'video_results' folder.")
         if processing == "Encoding ladder":
             if r1080p == True:
                 videos.append("1080p")

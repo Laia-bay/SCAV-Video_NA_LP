@@ -84,6 +84,7 @@ async def bw_endpoint(file: UploadFile = File(...)):
 @app.post("/resize_video")
 async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(...), height: int = Form(...)):
     video_bytes = await file.read()
+
     input_path = "images/temp_input.mp4"
     output_path = "video_results/output_resized_video.mp4"
 
@@ -108,8 +109,9 @@ async def resize_video_endpoint(file: UploadFile = File(...), width: int = Form(
 @app.post("/chroma_subsampling")
 async def chroma_subsampling_endpoint(file: UploadFile = File(...), subsampling: str = Form(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_chroma_subsampling_input.jpg")
-    output_path = os.path.join(RESULT_FOLDER, "output_chroma_subsampling.jpg")
+
+    input_path = "images/temp_chroma_subsampling_input.jpg"
+    output_path = "image_results/output_chroma_subsampling.jpg"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -125,7 +127,7 @@ async def chroma_subsampling_endpoint(file: UploadFile = File(...), subsampling:
 @app.post("/video_info")
 async def video_info_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_video_info_input.mp4")
+    input_path = "video_results/temp_video_info_input.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -149,17 +151,17 @@ async def video_info_endpoint(file: UploadFile = File(...)):
 @app.post("/create_BBB_container")
 async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio: bool = Form(...), MP3_audio: bool = Form(...), AC3_audio: bool = Form(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_bbb_input.mp4")
-    trimmed_video_path = os.path.join(RESULT_VIDEO_FOLDER, "temp_bbb_trimmed.mp4")
-    aac_audio_path = os.path.join(RESULT_VIDEO_FOLDER, "aac_mono_audio.aac")
-    mp3_audio_path = os.path.join(RESULT_VIDEO_FOLDER, "mp3_stereo_audio.mp3")
-    ac3_audio_path = os.path.join(RESULT_VIDEO_FOLDER, "ac3_audio.ac3")
-    output_path = os.path.join(RESULT_VIDEO_FOLDER, "output_BBB_container.mp4")
+    input_path = "videos/temp_bbb_input.mp4"
+    trimmed_video_path = "video_results/temp_bbb_trimmed.mp4"
+    aac_audio_path = "video_results/aac_mono_audio.aac"
+    mp3_audio_path = "video_results/mp3_stereo_audio.mp3"
+    ac3_audio_path = "video_results/ac3_audio.ac3"
+    output_path = "video_results/output_BBB_container.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
 
-    ffmpeg.input(input_path).output(trimmed_video_path, t=20, vcodec="libx264", acodec="copy").run(
+    ffmpeg.input(input_path).output(trimmed_video_path, t=20, vcodec="libx264").run(
         overwrite_output=True, capture_stdout=True, capture_stderr=True
     )
 
@@ -179,11 +181,12 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
         return JSONResponse({"ERROR": "Select at least ONE audio track"}, status_code=400)
 
     video_input = ffmpeg.input(trimmed_video_path)
-    audio_inputs =[ffmpeg.input(a) for a in audio_tracks]
+    input = [video_input] + [ffmpeg.input(a) for a in audio_tracks]
+    ffmpeg.output(video_input, *input, output_path, vcodec="copy", acodec="copy", strict="experimental").run(overwrite_output=True)
 
-    ffmpeg.output(video_input, audio_inputs, vcodec="copy", acodec="copy").run(overwrite_output=True)
-
-    os.remove(input_path)
+    for path in [input_path, trimmed_video_path]:
+        if os.path.exists(path):
+            os.remove(path)
 
     with open(output_path, "rb") as f:
         return Response(content=f.read(), media_type="video/mp4")
@@ -191,7 +194,7 @@ async def create_BBB_container_endpoint(file: UploadFile = File(...), AAC_audio:
 @app.post("/inspect_mp4_tracks")
 async def inspect_mp4_tracks_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_container_mp4")
+    input_path = "videos/temp_container_mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -206,8 +209,8 @@ async def inspect_mp4_tracks_endpoint(file: UploadFile = File(...)):
 @app.post("/macroblocks_motion_vectors")
 async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_input_mp4")
-    output_path = os.path.join(RESULT_VIDEO_FOLDER, "output_test_macroblocks_motion_vectors.mp4")
+    input_path = "videos/temp_input_mp4"
+    output_path = "video_results/output_test_macroblocks_motion_vectors.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -223,8 +226,8 @@ async def macroblocks_motion_vectors_endpoint(file: UploadFile = File(...)):
 @app.post("/yuv_histogram")
 async def yuv_histogram_endpoint(file: UploadFile = File(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_input.mp4")
-    output_path = os.path.join(RESULT_VIDEO_FOLDER, "output_test_yuv_histogram.mp4")
+    input_path = "videos/temp_input.mp4"
+    output_path = "video_results/output_test_yuv_histogram.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -240,11 +243,11 @@ async def yuv_histogram_endpoint(file: UploadFile = File(...)):
 @app.post("/convert_video_format")
 async def convert_video_format_endpoint(file: UploadFile = File(...), VP8: bool = Form(...), VP9: bool = Form(...), h265: bool = Form(...), AV1: bool = Form(...)):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_input.mp4")
-    output_vp8_path = os.path.join(RESULT_VIDEO_FOLDER, "output_convert_vp8.webm")
-    output_vp9_path = os.path.join(RESULT_VIDEO_FOLDER, "output_convert_vp9.webm")
-    output_h265_path = os.path.join(RESULT_VIDEO_FOLDER, "output_convert_h265.mp4")
-    output_av1_path = os.path.join(RESULT_VIDEO_FOLDER, "output_convert_av1.mp4")
+    input_path = "videos/temp_input.mp4"
+    output_vp8_path = "video_results/output_convert_vp8.webm"
+    output_vp9_path = "video_results/output_convert_vp9.webm"
+    output_h265_path = "video_results/output_convert_h265.mp4"
+    output_av1_path = "video_results/output_convert_av1.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -294,7 +297,7 @@ async def encoding_ladder_endpoint(
     r240p: bool = Form(...)
 ):
     video_bytes = await file.read()
-    input_path = os.path.join(IMAGE_FOLDER, "temp_encoding_ladder_input.mp4")
+    input_path = "videos/temp_encoding_ladder_input.mp4"
 
     with open(input_path, "wb") as f:
         f.write(video_bytes)
@@ -320,7 +323,7 @@ async def encoding_ladder_endpoint(
     generated_files = []
     for resolution in ladder:
         width, height = ladder_options[resolution]
-        output_path = os.path.join(RESULT_VIDEO_FOLDER, f"output_{resolution}.mp4")
+        output_path = f"video_results/output_{resolution}.mp4"
         ffmpeg.input(input_path).output(output_path, vf=f"scale={width}:{height}").run(capture_stdout=True, capture_stderr=True, overwrite_output=True)
         generated_files.append(output_path)
 
